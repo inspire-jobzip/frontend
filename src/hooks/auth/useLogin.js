@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { authApi } from "../../api/auth/auth.api";
+import { saveAuthSession } from "../../api/auth/auth.session";
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +16,8 @@ export function useLogin() {
       const loginData = await authApi.login(
         credentials,
       );
+
+      saveAuthSession(loginData);
 
       return loginData;
     } catch (error) {

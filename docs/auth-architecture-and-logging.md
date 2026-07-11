@@ -31,7 +31,8 @@ src/
 │  │  ├─ auth.api.js                   # signup/login/refresh/logout API
 │  │  ├─ auth.constants.js             # endpoint, 직무 및 경력 상수
 │  │  ├─ auth.mappers.js               # 폼 상태 → 가입 요청 변환
-│  │  └─ auth.schemas.js               # 인증 응답 Zod 검증
+│  │  ├─ auth.schemas.js               # 인증 응답 Zod 검증
+│  │  └─ auth.session.js               # 로그인 세션 저장/조회/삭제
 │  ├─ skill/
 │  │  ├─ skill.api.js                  # 기술 검색 API
 │  │  └─ skill.schemas.js              # 기술 응답 검증
@@ -52,6 +53,7 @@ src/
 | Hook | 비동기 요청, 로딩 및 오류 상태 | `useLogin.js`, `useSignup.js`, `useSkillSearch.js` |
 | Mapper | UI 상태를 API 계약으로 변환 | `auth.mappers.js` |
 | API | endpoint 호출과 parser 선택 | `auth.api.js`, `skill.api.js` |
+| Session | 인증 토큰과 사용자 세션의 브라우저 저장 | `auth.session.js` |
 | Schema | 서버 응답 런타임 검증 | `auth.schemas.js`, `skill.schemas.js` |
 | Common | HTTP 처리와 오류 표준화 | `api/common/*` |
 
@@ -72,6 +74,7 @@ flowchart LR
     SignupForm --> SkillModal[SkillSearchModal]
     SkillModal --> UseSkill[useSkillSearch]
     UseLogin --> AuthApi[auth.api]
+    UseLogin --> Session[auth.session]
     UseSignup --> Mapper[auth.mappers]
     UseSignup --> AuthApi
     UseSkill --> SkillApi[skill.api]
@@ -91,7 +94,8 @@ flowchart LR
 2. 제출 시 `useLogin.login`을 호출하고 Hook이 로딩 및 오류 상태를 관리한다.
 3. `authApi.login`이 이메일 공백을 제거하고 `POST /api/v1/auth/login`을 호출한다.
 4. `loginResponseSchema`가 응답을 검증한다.
-5. 성공 데이터는 `onLoginSuccess`로 전달되고 실패 메시지는 `role="alert"`에 표시된다.
+5. 성공하면 `auth.session.js`가 토큰과 사용자 정보를 `sessionStorage`에 저장한다.
+6. 성공 데이터는 `onLoginSuccess`로 전달되고 실패 메시지는 `role="alert"`에 표시된다.
 
 ### 회원가입
 
@@ -99,7 +103,7 @@ flowchart LR
 2. 신입 전환 시 숨겨진 경력 연차를 초기화한다.
 3. `createSignupRequest`가 이메일 공백, 신입 연차, 기술명 중복을 정리한다.
 4. `authApi.signup`이 `POST /api/v1/auth/signup`을 호출한다.
-5. 성공 데이터는 `onSignupSuccess`로 전달된다.
+5. 성공 데이터는 `onSignupSuccess`로 전달되고 로그인 탭으로 전환된다.
 
 ### 기술 검색
 
@@ -115,7 +119,16 @@ flowchart LR
 | 토큰 갱신 | POST | `/api/v1/auth/refresh` | body의 `refreshToken` |
 | 로그아웃 | POST | `/api/v1/auth/logout` | Bearer `accessToken`, body의 `refreshToken` |
 
-두 API는 `auth.api.js`에 있지만 UI/Hook에는 아직 연결되지 않았다. 세션 저장, 자동 갱신, 로그아웃 후 상태 정리는 별도의 인증 상태 관리 계층이 필요하다.
+두 API는 `auth.api.js`에 있지만 UI/Hook에는 아직 연결되지 않았다. 로그인 세션은 `sessionStorage`에 저장되며, 자동 갱신과 로그아웃 후 상태 정리는 추후 공통 인증 상태 관리 계층에 연결해야 한다.
+
+### 세션 저장 정책
+
+- 저장소: 브라우저 탭 단위 `sessionStorage`
+- 키: `dejavu.auth.session`
+- 저장 값: `accessToken`, `refreshToken`, `user`
+- 저장 시점: 로그인 응답 스키마 검증 성공 후
+- 손상된 JSON 발견 시: 해당 세션을 제거하고 비로그인 상태로 처리
+- 브라우저 탭 또는 창을 닫으면 세션이 제거된다.
 
 ## 오류 처리 현황
 
@@ -156,7 +169,7 @@ flowchart LR
 
 ## 현재 구현 시 주의사항
 
-- 로그인 토큰 저장 위치가 정의되지 않았다.
+- 로그인 토큰은 `sessionStorage`에 저장된다. XSS 방어가 필요한 민감 데이터이므로 DOM 삽입과 로그 출력을 금지한다.
 - refresh/logout API가 UI/Hook과 연결되지 않았다.
 - 비밀번호 찾기 버튼은 동작이 없는 UI이다.
 - 기술 검색의 `isLoading`이 모달 로딩 UI에 사용되지 않는다.
@@ -173,3 +186,23 @@ flowchart LR
 - [ ] 로그에서 비밀번호, 토큰, 개인정보가 제외되는가?
 - [ ] 검색 취소가 장애로 집계되지 않는가?
 - [ ] 로그인/회원가입/검색의 성공 및 실패 경로를 테스트했는가?
+
+## 변경 로그
+
+### 2026-07-11 — 전체 API 명세 기반 인증 보완
+
+- 전체 API 명세의 공통 Base URL이 `/api/v1`임을 확인했다.
+- 로그인 성공 시 액세스 토큰, 리프레시 토큰 및 사용자 정보를 `sessionStorage`에 저장하도록 `auth.session.js`를 추가했다.
+- 저장된 세션의 조회·삭제 기능과 손상된 JSON 자동 정리를 추가했다.
+- 회원가입 성공 후 로그인 탭으로 자동 전환하도록 `AuthPage` 흐름을 보완했다.
+- 로그인 요청의 이메일 공백 제거, 요청 필드 및 응답 구조를 검증하는 계약 테스트를 추가했다.
+- 회원가입의 여섯 요청 필드와 응답 구조를 검증하는 계약 테스트를 추가했다.
+- CRA 기본 `Learn React` 테스트를 실제 인증 화면 렌더링 테스트로 교체했다.
+- 검증 결과: 테스트 스위트 3개, 테스트 5개가 모두 통과했다.
+
+### 남은 작업
+
+- 보호 API 호출 시 저장된 액세스 토큰을 공통 HTTP 클라이언트에 전달한다.
+- `401 Unauthorized` 발생 시 토큰 재발급과 원 요청 재시도 정책을 구현한다.
+- 로그아웃 성공 또는 재발급 실패 시 `clearAuthSession`으로 세션을 제거한다.
+- 토큰 값을 콘솔, 분석 이벤트 또는 운영 로그에 기록하지 않는다.

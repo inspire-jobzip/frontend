@@ -21,6 +21,11 @@ export function AuthPage({
 
   const isLoginTab = activeTab === "login";
 
+  function handleSignupSuccess(signupData) {
+    onSignupSuccess(signupData);
+    setActiveTab("login");
+  }
+
   return (
     <div className="auth-page">
       <header className="auth-header">
@@ -112,7 +117,7 @@ export function AuthPage({
                   recommendedSkills
                 }
                 onSignupSuccess={
-                  onSignupSuccess
+                  handleSignupSuccess
                 }
               />
             </div>
