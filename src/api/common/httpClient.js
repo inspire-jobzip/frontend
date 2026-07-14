@@ -74,8 +74,24 @@ export function createHttpClient(
     });
   }
 
+  function patch(path, options) {
+    return request(path, {
+      ...options,
+      method: "PATCH",
+    });
+  }
+
+  function deleteRequest(path, options) {
+    return request(path, {
+      ...options,
+      method: "DELETE",
+    });
+  }
+
   return {
     get,
     post,
+    patch,
+    delete: deleteRequest,
   };
 }

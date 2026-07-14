@@ -7,7 +7,7 @@ import {
 
 import { AuthPage } from "./pages/AuthPage";
 import { JobNoticesPage } from "./pages/JobNoticesPage";
-import { MyPage } from "./pages/MyPage";
+import { MyPagePage } from "./pages/MyPagePage";
 import { authApi } from "./api/auth/auth.api";
 import {
   clearAuthSession,
@@ -75,14 +75,11 @@ function App() {
         path="/mypage"
         element={
           authSession ? (
-            <MyPage
-              authSession={authSession}
-              onLogout={handleLogout}
-            />
+          <MyPagePage />
           ) : (
-            <Navigate to="/auth" replace />
+          <Navigate to="/auth" replace />
           )
-        }
+          }
       />
 
       <Route
