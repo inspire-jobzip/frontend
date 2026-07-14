@@ -12,10 +12,22 @@ import {
   createResumeProjectResponseSchema,
   createResumeResponseSchema,
   resumeDetailResponseSchema,
+  resumeListResponseSchema,
   resumeMutationResponseSchema,
 } from "./resume.schemas";
 
 export function createResumeApi(httpClient) {
+  async function getResumes({ accessToken, signal }) {
+    const response = await httpClient.get(
+      RESUME_ENDPOINTS.collection,
+      { accessToken, signal },
+    );
+    return parseApiDataResponse(
+      response,
+      resumeListResponseSchema,
+    );
+  }
+
   async function getResume({ accessToken, resumeId, signal }) {
     const response = await httpClient.get(
       RESUME_ENDPOINTS.detail(resumeId),
@@ -72,6 +84,7 @@ export function createResumeApi(httpClient) {
   }
 
   return {
+    getResumes,
     getResume,
     createResume,
     updateResume,
