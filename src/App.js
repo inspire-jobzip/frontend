@@ -9,6 +9,7 @@ import { AuthPage } from "./pages/AuthPage";
 import { JobNoticesPage } from "./pages/JobNoticesPage";
 import { MyPagePage } from "./pages/MyPagePage";
 import { authApi } from "./api/auth/auth.api";
+import { ResumeCreatePage } from "./pages/ResumeCreatePage";
 import {
   clearAuthSession,
   getAuthSession,
@@ -80,6 +81,17 @@ function App() {
           <Navigate to="/auth" replace />
           )
           }
+      />
+
+      <Route
+        path="/resume/new"
+        element={
+        authSession ? (
+        <ResumeCreatePage />
+        ) : (
+          <Navigate to="/auth" replace />
+        )
+        }
       />
 
       <Route

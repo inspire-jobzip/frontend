@@ -120,6 +120,12 @@ test("restores the login session and exposes logout", async () => {
   ).toBeInTheDocument();
 
   fireEvent.click(
+    screen.getByRole("link", {
+      name: "채용공고",
+    }),
+  );
+
+  fireEvent.click(
     screen.getByRole("button", {
       name: "로그아웃",
     }),
@@ -127,7 +133,7 @@ test("restores the login session and exposes logout", async () => {
 
   await waitFor(() => {
     expect(
-      screen.getByRole("tab", { name: "로그인" }),
+      screen.getByRole("link", { name: "로그인" }),
     ).toBeInTheDocument();
     expect(
       window.sessionStorage.getItem(
@@ -135,4 +141,42 @@ test("restores the login session and exposes logout", async () => {
       ),
     ).toBeNull();
   });
+});
+
+test("renders the single-scroll resume form for a signed-in user", () => {
+  window.sessionStorage.setItem(
+    "dejavu.auth.session",
+    JSON.stringify({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: {
+        userId: 1,
+        name: "김나연",
+        email: "user@email.com",
+      },
+    }),
+  );
+
+  render(
+    <MemoryRouter initialEntries={["/resume/new"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    screen.getByRole("heading", {
+      name: "이력서 작성",
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "경력" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "프로젝트" }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", {
+      name: "이력서 저장하기",
+    }),
+  ).toBeInTheDocument();
 });
