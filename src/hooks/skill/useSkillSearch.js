@@ -18,16 +18,8 @@ export function useSkillSearch() {
 
   const abortControllerRef = useRef(null);
 
-  const searchSkills = useCallback(
-    async (keyword) => {
-      const trimmedKeyword = keyword.trim();
-
-      if (!trimmedKeyword) {
-        setSkills([]);
-        setErrorMessage("");
-
-        return [];
-      }
+  const loadSkills = useCallback(
+    async ({ keyword = "", category = "" } = {}) => {
 
       // 늦게 도착한 이전 응답이 최신 검색 결과를 덮지 않도록 취소한다.
       abortControllerRef.current?.abort();
@@ -44,7 +36,8 @@ export function useSkillSearch() {
       try {
         const searchResults =
           await skillApi.searchSkills({
-            keyword: trimmedKeyword,
+            keyword,
+            category,
             signal: abortController.signal,
           });
 
@@ -78,6 +71,12 @@ export function useSkillSearch() {
     [],
   );
 
+  const searchSkills = useCallback(
+    (keyword) =>
+      loadSkills({ keyword: keyword.trim() }),
+    [loadSkills],
+  );
+
   const clearSearchResults = useCallback(() => {
     abortControllerRef.current?.abort();
 
@@ -97,6 +96,7 @@ export function useSkillSearch() {
     skills,
     isLoading,
     errorMessage,
+    loadSkills,
     searchSkills,
     clearSearchResults,
   };
