@@ -12,6 +12,7 @@ export function createSkillApi(httpClient) {
   async function searchSkills({
     keyword = "",
     category = "",
+    accessToken,
     signal,
   } = {}) {
     const searchParams = new URLSearchParams();
@@ -38,6 +39,7 @@ export function createSkillApi(httpClient) {
       : SKILL_ENDPOINT;
 
     const response = await httpClient.get(path, {
+      accessToken,
       signal,
     });
 

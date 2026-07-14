@@ -9,7 +9,7 @@ import {
   skillApi,
 } from "../../api/skill/skill.api";
 
-export function useSkillSearch() {
+export function useSkillSearch(accessToken) {
   const [skills, setSkills] = useState([]);
   const [isLoading, setIsLoading] =
     useState(false);
@@ -38,6 +38,7 @@ export function useSkillSearch() {
           await skillApi.searchSkills({
             keyword,
             category,
+            accessToken,
             signal: abortController.signal,
           });
 
@@ -68,7 +69,7 @@ export function useSkillSearch() {
         }
       }
     },
-    [],
+    [accessToken],
   );
 
   const searchSkills = useCallback(
