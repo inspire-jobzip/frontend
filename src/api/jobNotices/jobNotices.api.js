@@ -12,6 +12,7 @@ import {
 } from "./jobNotices.mappers";
 import {
   jobNoticeListResponseSchema,
+  bookmarkResponseSchema,
 } from "./jobNotices.schemas";
 
 export function createJobNoticesApi(httpClient) {
@@ -41,8 +42,40 @@ export function createJobNoticesApi(httpClient) {
     );
   }
 
+  async function createBookmark({
+    jobNoticeId,
+    accessToken,
+  }) {
+    const response = await httpClient.post(
+      `${JOB_NOTICES_ENDPOINT}/${jobNoticeId}/bookmark`,
+      { accessToken },
+    );
+
+    return parseApiDataResponse(
+      response,
+      bookmarkResponseSchema,
+    );
+  }
+
+  async function deleteBookmark({
+    jobNoticeId,
+    accessToken,
+  }) {
+    const response = await httpClient.delete(
+      `${JOB_NOTICES_ENDPOINT}/${jobNoticeId}/bookmark`,
+      { accessToken },
+    );
+
+    return parseApiDataResponse(
+      response,
+      bookmarkResponseSchema,
+    );
+  }
+
   return {
     getJobNotices,
+    createBookmark,
+    deleteBookmark,
   };
 }
 

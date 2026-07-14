@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   DEFAULT_JOB_NOTICE_FILTERS,
@@ -41,9 +44,8 @@ function createInitialFilters() {
 export function JobNoticesPage({
   authSession = null,
   onLogout = () => {},
-  onBookmarkToggle = () => {},
-  pendingBookmarkIds = [],
 }) {
+  const navigate = useNavigate();
   const [draftFilters, setDraftFilters] =
     useState(createInitialFilters);
   const [appliedFilters, setAppliedFilters] =
@@ -61,12 +63,37 @@ export function JobNoticesPage({
     totalElements,
     isLoading,
     errorMessage,
+    pendingBookmarkIds,
     retry,
+    toggleBookmark,
   } = useJobNotices({
     filters: appliedFilters,
     page,
     size: DEFAULT_JOB_NOTICE_PAGE_SIZE,
+    accessToken: authSession?.accessToken,
   });
+
+  async function handleBookmarkToggle(jobNotice) {
+    if (!authSession?.accessToken) {
+      navigate("/auth");
+      return;
+    }
+
+    try {
+      await toggleBookmark(jobNotice);
+    } catch (error) {
+      if (error?.status === 401) {
+        navigate("/auth");
+        return;
+      }
+
+      window.alert(
+        error instanceof Error
+          ? error.message
+          : "북마크 처리에 실패했습니다.",
+      );
+    }
+  }
 
   function handleFilterChange(name, value) {
     setDraftFilters((currentFilters) => ({
@@ -213,7 +240,7 @@ export function JobNoticesPage({
               isLoading={isLoading}
               errorMessage={errorMessage}
               onRetry={retry}
-              onBookmarkToggle={onBookmarkToggle}
+              onBookmarkToggle={handleBookmarkToggle}
               pendingBookmarkIds={
                 pendingBookmarkIds
               }

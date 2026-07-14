@@ -25,6 +25,7 @@ export function useJobNotices({
   filters = DEFAULT_JOB_NOTICE_FILTERS,
   page = DEFAULT_JOB_NOTICE_PAGE,
   size = DEFAULT_JOB_NOTICE_PAGE_SIZE,
+  accessToken,
 } = {}) {
   const [jobNoticePage, setJobNoticePage] =
     useState(EMPTY_JOB_NOTICE_PAGE);
@@ -34,6 +35,8 @@ export function useJobNotices({
     useState("");
   const [reloadCount, setReloadCount] =
     useState(0);
+  const [pendingBookmarkIds, setPendingBookmarkIds] =
+    useState([]);
 
   const abortControllerRef = useRef(null);
   const skillNamesKey = Array.isArray(
@@ -119,6 +122,55 @@ export function useJobNotices({
     );
   }, []);
 
+  const toggleBookmark = useCallback(
+    async (jobNotice) => {
+      const { jobNoticeId, isBookmarked } =
+        jobNotice;
+
+      setPendingBookmarkIds((currentIds) => [
+        ...currentIds,
+        jobNoticeId,
+      ]);
+
+      try {
+        const bookmark = isBookmarked
+          ? await jobNoticesApi.deleteBookmark({
+              jobNoticeId,
+              accessToken,
+            })
+          : await jobNoticesApi.createBookmark({
+              jobNoticeId,
+              accessToken,
+            });
+
+        setJobNoticePage((currentPage) => ({
+          ...currentPage,
+          content: currentPage.content.map(
+            (currentJobNotice) =>
+              currentJobNotice.jobNoticeId ===
+              jobNoticeId
+                ? {
+                    ...currentJobNotice,
+                    isBookmarked:
+                      bookmark.isBookmarked,
+                  }
+                : currentJobNotice,
+          ),
+        }));
+
+        return bookmark;
+      } finally {
+        setPendingBookmarkIds((currentIds) =>
+          currentIds.filter(
+            (currentId) =>
+              currentId !== jobNoticeId,
+          ),
+        );
+      }
+    },
+    [accessToken],
+  );
+
   return {
     jobNotices: jobNoticePage.content,
     currentPage: jobNoticePage.page,
@@ -126,6 +178,8 @@ export function useJobNotices({
     totalElements: jobNoticePage.totalElements,
     isLoading,
     errorMessage,
+    pendingBookmarkIds,
     retry,
+    toggleBookmark,
   };
 }
