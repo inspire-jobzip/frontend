@@ -18,7 +18,7 @@ export const skillListResponseSchema =
     z.object({
       success: z.literal(true),
       data: skillListSchema,
-      message: z.string().optional(),
+      message: z.string().nullable().optional(),
     }),
     apiFailureResponseSchema,
   ]);

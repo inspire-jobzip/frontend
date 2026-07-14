@@ -15,7 +15,6 @@ export function SkillSearchModal({
   isOpen,
   desiredJobRole,
   selectedSkills,
-  recommendedSkills = [],
   onChange,
   onClose,
 }) {
@@ -25,7 +24,9 @@ export function SkillSearchModal({
 
   const {
     skills,
+    isLoading,
     errorMessage,
+    loadSkills,
     searchSkills,
     clearSearchResults,
   } = useSkillSearch();
@@ -37,6 +38,7 @@ export function SkillSearchModal({
 
     // 모달을 다시 열 때 현재 폼의 선택 상태에서 작업본을 새로 만든다.
     setDraftSkills(selectedSkills);
+    setKeyword("");
   }, [isOpen, selectedSkills]);
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export function SkillSearchModal({
     const trimmedKeyword = keyword.trim();
 
     if (!trimmedKeyword) {
-      clearSearchResults();
+      loadSkills();
       return;
     }
 
@@ -62,18 +64,15 @@ export function SkillSearchModal({
   }, [
     keyword,
     isOpen,
+    loadSkills,
     searchSkills,
     clearSearchResults,
   ]);
 
   const displayedSkills = useMemo(() => {
     // 검색어가 없을 때는 서버 검색 결과 대신 직무별 추천 목록을 보여준다.
-    if (keyword.trim()) {
-      return skills;
-    }
-
-    return recommendedSkills;
-  }, [keyword, skills, recommendedSkills]);
+    return skills;
+  }, [skills]);
 
   function isSkillSelected(skillId) {
     return draftSkills.some(
@@ -198,7 +197,11 @@ export function SkillSearchModal({
           </p>
         )}
 
-        {!hasResults && hasKeyword ? (
+        {isLoading ? (
+          <p className="skill-modal__empty">
+            Loading skills...
+          </p>
+        ) : !hasResults && hasKeyword ? (
           <div className="skill-modal__empty">
             <strong>검색 결과가 없어요</strong>
 

@@ -15,7 +15,12 @@ test("login follows the documented request and response contract", async () => {
   const httpClient = {
     post: jest.fn().mockResolvedValue({
       status: 200,
-      body: { success: true, data: responseData },
+      body: {
+        success: true,
+        data: responseData,
+        message: null,
+        error: null,
+      },
     }),
   };
 
