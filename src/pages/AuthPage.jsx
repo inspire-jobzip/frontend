@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   AuthTabs,
@@ -16,10 +17,16 @@ export function AuthPage({
   onLoginSuccess = () => {},
   onSignupSuccess = () => {},
 }) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] =
     useState("login");
 
   const isLoginTab = activeTab === "login";
+
+  function handleLoginSuccess(loginData) {
+    onLoginSuccess(loginData);
+    navigate("/jobs", { replace: true });
+  }
 
   function handleSignupSuccess(signupData) {
     onSignupSuccess(signupData);
@@ -102,7 +109,7 @@ export function AuthPage({
             >
               <LoginForm
                 onLoginSuccess={
-                  onLoginSuccess
+                  handleLoginSuccess
                 }
               />
             </div>

@@ -51,7 +51,7 @@ function createApiDataResponseSchema(dataSchema) {
     z.object({
       success: z.literal(true),
       data: dataSchema,
-      message: z.string().optional(),
+      message: z.string().nullable().optional(),
     }),
     apiFailureResponseSchema,
   ]);

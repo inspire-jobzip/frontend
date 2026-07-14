@@ -14,7 +14,6 @@ import {
 } from "../../hooks/auth/useSignup";
 
 export function SignupForm({
-  recommendedSkills = [],
   onSignupSuccess = () => {},
 }) {
   const [email, setEmail] = useState("");
@@ -254,9 +253,6 @@ export function SignupForm({
         isOpen={isSkillModalOpen}
         desiredJobRole={desiredJobRole}
         selectedSkills={selectedSkills}
-        recommendedSkills={
-          recommendedSkills
-        }
         onChange={setSelectedSkills}
         onClose={() =>
           setIsSkillModalOpen(false)
