@@ -7,6 +7,7 @@ import {
 
 import { AuthPage } from "./pages/AuthPage";
 import { JobNoticesPage } from "./pages/JobNoticesPage";
+import { JobNoticeDetailPage } from "./pages/JobNoticeDetailPage";
 import { MyPagePage } from "./pages/MyPagePage";
 import { authApi } from "./api/auth/auth.api";
 import { ResumeCreatePage } from "./pages/ResumeCreatePage";
@@ -53,6 +54,16 @@ function App() {
         path="/jobs"
         element={
           <JobNoticesPage
+            authSession={authSession}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      <Route
+        path="/jobs/:jobNoticeId"
+        element={
+          <JobNoticeDetailPage
             authSession={authSession}
             onLogout={handleLogout}
           />

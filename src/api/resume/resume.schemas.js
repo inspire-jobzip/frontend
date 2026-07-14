@@ -166,6 +166,14 @@ const resumeDetailSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });
+
+const resumeSummarySchema = z.object({
+  resumeId: z.number().int().positive(),
+  title: z.string(),
+  name: z.string().optional(),
+  isDefault: z.boolean(),
+  updatedAt: z.string().nullable().optional(),
+});
 const createdProjectSchema = z.object({
   resumeProjectId: z.number().int().positive(),
   resumeId: z.number().int().positive(),
@@ -191,6 +199,11 @@ export const createResumeProjectResponseSchema =
 
 export const resumeDetailResponseSchema =
   createDataResponseSchema(resumeDetailSchema);
+
+export const resumeListResponseSchema =
+  createDataResponseSchema(
+    z.array(resumeSummarySchema),
+  );
 
 export const resumeMutationResponseSchema = z.discriminatedUnion(
   "success",
