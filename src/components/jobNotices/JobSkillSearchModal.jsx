@@ -8,15 +8,6 @@ import {
   useSkillSearch,
 } from "../../hooks/skill/useSkillSearch";
 
-const POPULAR_SKILL_NAMES = [
-  "Java",
-  "Spring Boot",
-  "JavaScript",
-  "React",
-  "Python",
-  "Docker",
-];
-
 export function JobSkillSearchModal({
   isOpen,
   selectedSkillNames,
@@ -31,8 +22,8 @@ export function JobSkillSearchModal({
     skills,
     isLoading,
     errorMessage,
+    loadSkills,
     searchSkills,
-    clearSearchResults,
   } = useSkillSearch();
 
   useEffect(() => {
@@ -42,9 +33,7 @@ export function JobSkillSearchModal({
 
     setKeyword("");
     setDraftSkillNames(selectedSkillNames);
-    clearSearchResults();
   }, [
-    clearSearchResults,
     isOpen,
     selectedSkillNames,
   ]);
@@ -57,7 +46,7 @@ export function JobSkillSearchModal({
     const trimmedKeyword = keyword.trim();
 
     if (!trimmedKeyword) {
-      clearSearchResults();
+      loadSkills();
       return;
     }
 
@@ -69,15 +58,15 @@ export function JobSkillSearchModal({
       window.clearTimeout(timeoutId);
     };
   }, [
-    clearSearchResults,
     isOpen,
     keyword,
+    loadSkills,
     searchSkills,
   ]);
 
   const displayedSkillNames = useMemo(() => {
     if (!keyword.trim()) {
-      return POPULAR_SKILL_NAMES;
+      return skills.map((skill) => skill.skillName);
     }
 
     return skills.map((skill) => skill.skillName);

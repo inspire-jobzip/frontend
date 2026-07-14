@@ -39,6 +39,8 @@ function createInitialFilters() {
 }
 
 export function JobNoticesPage({
+  authSession = null,
+  onLogout = () => {},
   onBookmarkToggle = () => {},
   pendingBookmarkIds = [],
 }) {
@@ -134,12 +136,33 @@ export function JobNoticesPage({
           </Link>
           <Link to="/calendar">캘린더</Link>
           <Link to="/resume">이력서</Link>
-          <Link
-            className="job-notices-header__login"
-            to="/auth"
-          >
-            로그인
-          </Link>
+          {authSession ? (
+            <>
+              <span className="job-notices-header__user">
+                {authSession.user.email}
+              </span>
+              <Link
+                className="job-notices-header__mypage"
+                to="/mypage"
+              >
+                마이페이지
+              </Link>
+              <button
+                className="job-notices-header__login"
+                type="button"
+                onClick={onLogout}
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <Link
+              className="job-notices-header__login"
+              to="/auth"
+            >
+              로그인
+            </Link>
+          )}
         </nav>
       </header>
 
