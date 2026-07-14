@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Navigate,
   useNavigate,
+  useParams,
 } from "react-router-dom";
 
 import {
@@ -24,6 +25,7 @@ import {
 import {
   ResumeFormSection,
 } from "../components/resume/ResumeFormSection";
+import { ResumeDeleteButton } from "../components/resume/ResumeDeleteButton";
 import {
   ResumeHeader,
 } from "../components/resume/ResumeHeader";
@@ -33,6 +35,9 @@ import {
 import {
   useCreateResume,
 } from "../hooks/resume/useCreateResume";
+import {
+  useEditResume,
+} from "../hooks/resume/useEditResume";
 import "../styles/resume-create.css";
 
 function createInitialForm(session) {
@@ -64,18 +69,42 @@ function updateListItem(items, index, key, value) {
 
 export function ResumeCreatePage() {
   const navigate = useNavigate();
+  const { resumeId: resumeIdParam } = useParams();
+  const resumeId = resumeIdParam ? Number(resumeIdParam) : null;
+  const isEditMode = Number.isInteger(resumeId) && resumeId > 0;
   const session = getAuthSession();
   const accessToken = session?.accessToken;
   const [form, setForm] = useState(() =>
     createInitialForm(session),
   );
+  const createState = useCreateResume(accessToken);
+  const editState = useEditResume(
+    accessToken,
+    isEditMode ? resumeId : null,
+  );
+  const activeState = isEditMode ? editState : createState;
   const {
     isSaving,
     errorMessage,
-    partiallySavedResumeId,
     saveResume,
-  } = useCreateResume(accessToken);
+  } = activeState;
+  const partiallySavedResumeId =
+    createState.partiallySavedResumeId;
 
+  useEffect(() => {
+    if (isEditMode && editState.loadedForm) {
+      setForm(editState.loadedForm);
+    }
+  }, [editState.loadedForm, isEditMode]);
+
+  if (isEditMode && editState.isLoading) {
+    return (
+      <div className="resume-create-page">
+        <ResumeHeader />
+        <main><p>이력서를 불러오는 중입니다...</p></main>
+      </div>
+    );
+  }
   if (!accessToken) {
     return <Navigate to="/auth" replace />;
   }
@@ -143,7 +172,7 @@ export function ResumeCreatePage() {
       <main>
         <header className="resume-create-intro">
           <div>
-            <h1>이력서 작성</h1>
+            <h1>{isEditMode ? "이력서 수정" : "이력서 작성"}</h1>
             <p>
               모든 항목을 한 화면에서 내려가며
               작성하세요.
@@ -446,6 +475,17 @@ export function ResumeCreatePage() {
               </p>
             </div>
             <div>
+              {isEditMode && (
+                <ResumeDeleteButton
+                  accessToken={accessToken}
+                  resumeId={resumeId}
+                  resumeTitle={form.title}
+                  disabled={isSaving}
+                  onDeleted={() =>
+                    navigate("/mypage", { replace: true })
+                  }
+                />
+              )}
               <button
                 type="button"
                 onClick={() => navigate("/mypage")}

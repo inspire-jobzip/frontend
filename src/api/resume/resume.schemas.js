@@ -86,6 +86,7 @@ export const resumeExperienceSchema = z
   });
 
 export const resumeProjectRequestSchema = z.object({
+  resumeProjectId: z.number().int().positive().nullable().optional(),
   projectName: z.string().trim().min(
     1,
     "프로젝트명을 입력해 주세요.",
@@ -116,7 +117,7 @@ export const resumeRequestSchema = z.object({
   githubUrl: optionalUrlSchema,
   blogUrl: optionalUrlSchema,
   summaryText: optionalTextSchema,
-  education: z.array(resumeEducationSchema),
+  education: z.array(z.string().trim().min(1)),
   experience: z.array(resumeExperienceSchema),
   resumeSkillNames: z.array(z.string()),
   motivationText: optionalTextSchema,
@@ -131,6 +132,40 @@ const createdResumeSchema = z.object({
   isDefault: z.boolean(),
 });
 
+const resumeProjectSchema = z.object({
+  resumeProjectId: z.number().int().positive(),
+  resumeId: z.number().int().positive(),
+  projectName: z.string(),
+  roleName: z.string().nullable(),
+  startYearMonth: z.string().nullable(),
+  endYearMonth: z.string().nullable(),
+  description: z.string().nullable(),
+  troubleshooting: z.string().nullable(),
+  techStacks: z.array(z.string()),
+  sortOrder: z.number().int(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+const resumeDetailSchema = z.object({
+  resumeId: z.number().int().positive(),
+  title: z.string(),
+  name: z.string(),
+  email: z.string(),
+  phone: z.string().nullable(),
+  githubUrl: z.string().nullable(),
+  blogUrl: z.string().nullable(),
+  summaryText: z.string().nullable(),
+  education: z.array(z.string()),
+  experience: z.array(resumeExperienceSchema),
+  resumeSkillNames: z.array(z.string()),
+  motivationText: z.string().nullable(),
+  strengthsAndWeaknessesText: z.string().nullable(),
+  isDefault: z.boolean(),
+  projects: z.array(resumeProjectSchema),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
 const createdProjectSchema = z.object({
   resumeProjectId: z.number().int().positive(),
   resumeId: z.number().int().positive(),
@@ -153,3 +188,18 @@ export const createResumeResponseSchema =
 
 export const createResumeProjectResponseSchema =
   createDataResponseSchema(createdProjectSchema);
+
+export const resumeDetailResponseSchema =
+  createDataResponseSchema(resumeDetailSchema);
+
+export const resumeMutationResponseSchema = z.discriminatedUnion(
+  "success",
+  [
+    z.object({
+      success: z.literal(true),
+      data: z.null().optional(),
+      message: z.string().nullable().optional(),
+    }),
+    apiFailureResponseSchema,
+  ],
+);

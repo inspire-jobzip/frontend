@@ -12,7 +12,15 @@ test("maps the form to the resume and project API payloads", () => {
     githubUrl: "https://github.com/user",
     blogUrl: "",
     summaryText: " 소개 ",
-    education: [],
+    education: [
+      {
+        schoolName: " Korea University ",
+        major: "Computer Science",
+        status: "Graduated",
+        startYearMonth: "2020-03",
+        endYearMonth: "2024-02",
+      },
+    ],
     experience: [
       {
         companyName: "회사",
@@ -50,6 +58,9 @@ test("maps the form to the resume and project API payloads", () => {
       phone: null,
       blogUrl: null,
       resumeSkillNames: ["Java"],
+      education: [
+        "Korea University | Computer Science | Graduated | 2020-03 ~ 2024-02",
+      ],
       experience: [
         expect.objectContaining({
           endYearMonth: null,

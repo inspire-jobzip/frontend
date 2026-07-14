@@ -180,3 +180,52 @@ test("renders the single-scroll resume form for a signed-in user", () => {
     }),
   ).toBeInTheDocument();
 });
+
+test("opens the resume page from an edit URL", async () => {
+  window.sessionStorage.setItem(
+    "dejavu.auth.session",
+    JSON.stringify({
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      user: {
+        userId: 1,
+        name: "김나연",
+        email: "user@email.com",
+      },
+    }),
+  );
+
+  global.fetch.mockResolvedValueOnce(
+    createJsonResponse({
+      success: true,
+      data: {
+        resumeId: 10,
+        title: "Backend Resume",
+        name: "김나연",
+        email: "user@email.com",
+        phone: null,
+        githubUrl: null,
+        blogUrl: null,
+        summaryText: null,
+        education: [],
+        experience: [],
+        resumeSkillNames: [],
+        motivationText: null,
+        strengthsAndWeaknessesText: null,
+        isDefault: false,
+        projects: [],
+      },
+    }),
+  );
+  render(
+    <MemoryRouter initialEntries={["/resume/10"]}>
+      <App />
+    </MemoryRouter>,
+  );
+
+  expect(
+    await screen.findByRole("heading", {
+      name: "이력서 수정",
+    }),
+  ).toBeInTheDocument();
+});

@@ -95,6 +95,16 @@ function App() {
       />
 
       <Route
+        path="/resume/:resumeId"
+        element={
+          authSession ? (
+            <ResumeCreatePage />
+          ) : (
+            <Navigate to="/auth" replace />
+          )
+        }
+      />
+      <Route
         path="*"
         element={<Navigate to="/" replace />}
       />

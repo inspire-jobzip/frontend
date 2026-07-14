@@ -14,6 +14,24 @@ function nullableYearMonth(value) {
   return value || null;
 }
 
+function createEducationSummary(education) {
+  const period = [
+    education.startYearMonth,
+    education.endYearMonth,
+  ]
+    .filter(Boolean)
+    .join(" ~ ");
+
+  return [
+    education.schoolName.trim(),
+    education.major.trim(),
+    education.status,
+    period,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+}
+
 export function createEmptyEducation() {
   return {
     clientId: createClientId("education"),
@@ -68,17 +86,9 @@ export function createResumeRequest(form) {
           education.startYearMonth ||
           education.endYearMonth,
       )
-      .map((education) => ({
-        schoolName: education.schoolName.trim(),
-        major: nullableText(education.major),
-        status: education.status,
-        startYearMonth: nullableYearMonth(
-          education.startYearMonth,
-        ),
-        endYearMonth: nullableYearMonth(
-          education.endYearMonth,
-        ),
-      })),
+      // The current backend DTO accepts education as List<String>.
+      // Keep all structured form values in a readable string.
+      .map(createEducationSummary),
     experience: form.experience
       .filter(
         (experience) =>
@@ -133,6 +143,7 @@ export function createProjectRequests(projects) {
         project.techStacksInput.trim(),
     )
     .map((project, index) => ({
+      resumeProjectId: project.resumeProjectId ?? null,
       projectName: project.projectName.trim(),
       roleName: nullableText(project.roleName),
       startYearMonth: nullableYearMonth(
@@ -153,4 +164,62 @@ export function createProjectRequests(projects) {
         .filter(Boolean),
       sortOrder: index + 1,
     }));
+}
+
+function parseEducationSummary(summary) {
+  const [schoolName = "", major = "", status = "재학", period = ""] =
+    summary.split(" | ");
+  const [startYearMonth = "", endYearMonth = ""] = period.split(" ~ ");
+
+  return {
+    ...createEmptyEducation(),
+    schoolName,
+    major,
+    status,
+    startYearMonth,
+    endYearMonth,
+  };
+}
+
+export function createResumeFormFromDetail(resume) {
+  return {
+    title: resume.title,
+    name: resume.name,
+    email: resume.email,
+    phone: resume.phone ?? "",
+    githubUrl: resume.githubUrl ?? "",
+    blogUrl: resume.blogUrl ?? "",
+    isDefault: resume.isDefault,
+    education: resume.education.length
+      ? resume.education.map(parseEducationSummary)
+      : [createEmptyEducation()],
+    experience: resume.experience.length
+      ? resume.experience.map((experience) => ({
+          ...createEmptyExperience(),
+          ...experience,
+          endYearMonth: experience.endYearMonth ?? "",
+          responsibilities: experience.responsibilities ?? "",
+        }))
+      : [createEmptyExperience()],
+    projects: resume.projects.length
+      ? resume.projects.map((project) => ({
+          ...createEmptyProject(),
+          resumeProjectId: project.resumeProjectId,
+          projectName: project.projectName,
+          roleName: project.roleName ?? "",
+          startYearMonth: project.startYearMonth ?? "",
+          endYearMonth: project.endYearMonth ?? "",
+          description: project.description ?? "",
+          troubleshooting: project.troubleshooting ?? "",
+          techStacksInput: project.techStacks.join(", "),
+        }))
+      : [createEmptyProject()],
+    selectedSkills: resume.resumeSkillNames.map((skillName, index) => ({
+      skillId: `stored-${index}`,
+      skillName,
+    })),
+    summaryText: resume.summaryText ?? "",
+    motivationText: resume.motivationText ?? "",
+    strengthsAndWeaknessesText: resume.strengthsAndWeaknessesText ?? "",
+  };
 }
