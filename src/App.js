@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 
 import { AuthPage } from "./pages/AuthPage";
+import { CalendarPage } from "./pages/CalendarPage";
 import { JobNoticesPage } from "./pages/JobNoticesPage";
 import { JobNoticeDetailPage } from "./pages/JobNoticeDetailPage";
 import { MyPagePage } from "./pages/MyPagePage";
@@ -64,6 +65,16 @@ function App() {
         path="/jobs/:jobNoticeId"
         element={
           <JobNoticeDetailPage
+            authSession={authSession}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      <Route
+        path="/calendar"
+        element={
+          <CalendarPage
             authSession={authSession}
             onLogout={handleLogout}
           />
