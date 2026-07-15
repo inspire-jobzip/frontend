@@ -73,8 +73,8 @@ export function useSkillSearch(accessToken) {
   );
 
   const searchSkills = useCallback(
-    (keyword) =>
-      loadSkills({ keyword: keyword.trim() }),
+    (keyword, category = "") =>
+      loadSkills({ keyword: keyword.trim(), category }),
     [loadSkills],
   );
 

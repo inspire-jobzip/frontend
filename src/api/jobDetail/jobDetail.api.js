@@ -15,12 +15,13 @@ import {
 
 export function createJobDetailApi(httpClient) {
   async function getJobDetail({
+    accessToken,
     jobNoticeId,
     signal,
   }) {
     const response = await httpClient.get(
       JOB_DETAIL_ENDPOINTS.detail(jobNoticeId),
-      { signal },
+      { accessToken, signal },
     );
 
     return parseApiDataResponse(

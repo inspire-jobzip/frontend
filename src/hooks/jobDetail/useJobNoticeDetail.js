@@ -94,6 +94,7 @@ export function useJobNoticeDetail({
     async function loadDetail() {
       try {
         const response = await jobDetailApi.getJobDetail({
+          accessToken,
           jobNoticeId,
           signal: abortController.signal,
         });

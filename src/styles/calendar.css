@@ -151,6 +151,27 @@
   gap: 8px;
 }
 
+.calendar-controls__filters > label {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 42px;
+}
+
+.calendar-controls__filters > label::after {
+  position: absolute;
+  top: 50%;
+  right: 18px;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--calendar-primary);
+  border-bottom: 2px solid var(--calendar-primary);
+  content: "";
+  pointer-events: none;
+  transform: translateY(-70%) rotate(45deg);
+  transform-origin: center;
+}
+
 .calendar-controls button,
 .calendar-controls select {
   min-height: 42px;
@@ -181,18 +202,30 @@
 .calendar-controls select {
   min-width: 124px;
   padding: 0 34px 0 14px;
+  appearance: none;
+  -webkit-appearance: none;
   cursor: pointer;
 }
 
 .calendar-controls__skill {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  height: 42px;
+  min-height: 42px;
+  gap: 12px;
+  line-height: normal;
 }
 
-.calendar-controls__skill span {
-  color: var(--calendar-primary);
-  font-size: 17px;
+.calendar-controls__skill::after {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-right: 2px solid var(--calendar-primary);
+  border-bottom: 2px solid var(--calendar-primary);
+  content: "";
+  transform: rotate(45deg) translate(-1px, -1px);
+  transform-origin: center;
 }
 
 .calendar-controls .calendar-controls__reset {
