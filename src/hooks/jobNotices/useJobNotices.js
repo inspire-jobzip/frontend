@@ -60,6 +60,7 @@ export function useJobNotices({
     try {
       const response =
         await jobNoticesApi.getJobNotices({
+          accessToken,
           filters: {
             keyword: filters.keyword,
             jobRole: filters.jobRole,
@@ -97,6 +98,7 @@ export function useJobNotices({
       }
     }
   }, [
+    accessToken,
     filters.keyword,
     filters.jobRole,
     filters.experienceLevel,
@@ -127,10 +129,26 @@ export function useJobNotices({
       const { jobNoticeId, isBookmarked } =
         jobNotice;
 
+      const updateBookmarkState = (nextIsBookmarked) => {
+        setJobNoticePage((currentPage) => ({
+          ...currentPage,
+          content: currentPage.content.map(
+            (currentJobNotice) =>
+              currentJobNotice.jobNoticeId === jobNoticeId
+                ? {
+                    ...currentJobNotice,
+                    isBookmarked: nextIsBookmarked,
+                  }
+                : currentJobNotice,
+          ),
+        }));
+      };
+
       setPendingBookmarkIds((currentIds) => [
         ...currentIds,
         jobNoticeId,
       ]);
+      updateBookmarkState(!isBookmarked);
 
       try {
         const bookmark = isBookmarked
@@ -143,22 +161,12 @@ export function useJobNotices({
               accessToken,
             });
 
-        setJobNoticePage((currentPage) => ({
-          ...currentPage,
-          content: currentPage.content.map(
-            (currentJobNotice) =>
-              currentJobNotice.jobNoticeId ===
-              jobNoticeId
-                ? {
-                    ...currentJobNotice,
-                    isBookmarked:
-                      bookmark.isBookmarked,
-                  }
-                : currentJobNotice,
-          ),
-        }));
+        updateBookmarkState(bookmark.isBookmarked);
 
         return bookmark;
+      } catch (error) {
+        updateBookmarkState(isBookmarked);
+        throw error;
       } finally {
         setPendingBookmarkIds((currentIds) =>
           currentIds.filter(
