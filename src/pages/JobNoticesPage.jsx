@@ -162,7 +162,6 @@ export function JobNoticesPage({
             채용공고
           </Link>
           <Link to="/calendar">캘린더</Link>
-          <Link to="/resume">이력서</Link>
           {authSession ? (
             <>
               <span className="job-notices-header__user">
