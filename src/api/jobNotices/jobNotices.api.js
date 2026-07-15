@@ -17,6 +17,7 @@ import {
 
 export function createJobNoticesApi(httpClient) {
   async function getJobNotices({
+    accessToken,
     filters,
     page,
     size,
@@ -32,6 +33,7 @@ export function createJobNoticesApi(httpClient) {
     const response = await httpClient.get(
       `${JOB_NOTICES_ENDPOINT}?${searchParams.toString()}`,
       {
+        accessToken,
         signal,
       },
     );

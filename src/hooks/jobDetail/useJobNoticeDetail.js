@@ -166,9 +166,21 @@ export function useJobNoticeDetail({
       return null;
     }
 
+    const previousIsBookmarked =
+      jobNotice.isBookmarked;
+
     setIsBookmarkPending(true);
+    setJobNotice((current) =>
+      current
+        ? {
+            ...current,
+            isBookmarked: !previousIsBookmarked,
+          }
+        : current,
+    );
+
     try {
-      const bookmark = jobNotice.isBookmarked
+      const bookmark = previousIsBookmarked
         ? await jobNoticesApi.deleteBookmark({
             jobNoticeId,
             accessToken,
@@ -183,6 +195,16 @@ export function useJobNoticeDetail({
         isBookmarked: bookmark.isBookmarked,
       }));
       return bookmark;
+    } catch (error) {
+      setJobNotice((current) =>
+        current
+          ? {
+              ...current,
+              isBookmarked: previousIsBookmarked,
+            }
+          : current,
+      );
+      throw error;
     } finally {
       setIsBookmarkPending(false);
     }
