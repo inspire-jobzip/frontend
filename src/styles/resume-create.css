@@ -174,6 +174,8 @@
 .resume-form-section > label,
 .resume-repeat-card label {
   display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 3px;
   gap: 9px;
   color: #303b52;
   font-size: 14px;
@@ -189,6 +191,7 @@
 .resume-form-section input,
 .resume-form-section select,
 .resume-form-section textarea {
+  grid-column: 1 / -1;
   width: 100%;
   border: 1px solid #ccd5e3;
   border-radius: 11px;

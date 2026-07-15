@@ -82,7 +82,6 @@ export function CalendarControls({
             {filters.skillNames.length > 0
               ? `기술 스택 ${filters.skillNames.length}개`
               : "기술 스택 전체"}
-            <span aria-hidden="true">⌄</span>
           </button>
 
           {(filters.jobRole ||

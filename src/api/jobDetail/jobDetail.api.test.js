@@ -43,12 +43,15 @@ test("uses the job detail and AI analysis endpoints", async () => {
   };
   const api = createJobDetailApi(httpClient);
 
-  await api.getJobDetail({ jobNoticeId: 101 });
+  await api.getJobDetail({
+    accessToken: "access-token",
+    jobNoticeId: 101,
+  });
   await api.analyzeJob({ jobNoticeId: 101 });
 
   expect(httpClient.get).toHaveBeenCalledWith(
     "/job-notices/101",
-    { signal: undefined },
+    { accessToken: "access-token", signal: undefined },
   );
   expect(httpClient.post).toHaveBeenCalledWith(
     "/job-notices/101/ai-analysis",
