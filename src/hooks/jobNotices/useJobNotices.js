@@ -25,6 +25,7 @@ export function useJobNotices({
   filters = DEFAULT_JOB_NOTICE_FILTERS,
   page = DEFAULT_JOB_NOTICE_PAGE,
   size = DEFAULT_JOB_NOTICE_PAGE_SIZE,
+  accessToken,
 } = {}) {
   const [jobNoticePage, setJobNoticePage] =
     useState(EMPTY_JOB_NOTICE_PAGE);
@@ -34,6 +35,8 @@ export function useJobNotices({
     useState("");
   const [reloadCount, setReloadCount] =
     useState(0);
+  const [pendingBookmarkIds, setPendingBookmarkIds] =
+    useState([]);
 
   const abortControllerRef = useRef(null);
   const skillNamesKey = Array.isArray(
@@ -57,6 +60,7 @@ export function useJobNotices({
     try {
       const response =
         await jobNoticesApi.getJobNotices({
+          accessToken,
           filters: {
             keyword: filters.keyword,
             jobRole: filters.jobRole,
@@ -94,6 +98,7 @@ export function useJobNotices({
       }
     }
   }, [
+    accessToken,
     filters.keyword,
     filters.jobRole,
     filters.experienceLevel,
@@ -119,6 +124,61 @@ export function useJobNotices({
     );
   }, []);
 
+  const toggleBookmark = useCallback(
+    async (jobNotice) => {
+      const { jobNoticeId, isBookmarked } =
+        jobNotice;
+
+      const updateBookmarkState = (nextIsBookmarked) => {
+        setJobNoticePage((currentPage) => ({
+          ...currentPage,
+          content: currentPage.content.map(
+            (currentJobNotice) =>
+              currentJobNotice.jobNoticeId === jobNoticeId
+                ? {
+                    ...currentJobNotice,
+                    isBookmarked: nextIsBookmarked,
+                  }
+                : currentJobNotice,
+          ),
+        }));
+      };
+
+      setPendingBookmarkIds((currentIds) => [
+        ...currentIds,
+        jobNoticeId,
+      ]);
+      updateBookmarkState(!isBookmarked);
+
+      try {
+        const bookmark = isBookmarked
+          ? await jobNoticesApi.deleteBookmark({
+              jobNoticeId,
+              accessToken,
+            })
+          : await jobNoticesApi.createBookmark({
+              jobNoticeId,
+              accessToken,
+            });
+
+        updateBookmarkState(bookmark.isBookmarked);
+
+        return bookmark;
+      } catch (error) {
+        updateBookmarkState(isBookmarked);
+        throw error;
+      } finally {
+        setPendingBookmarkIds((currentIds) =>
+          currentIds.filter(
+            (currentId) =>
+              currentId !== jobNoticeId,
+          ),
+        );
+      }
+    },
+    [accessToken],
+  );
+
   return {
     jobNotices: jobNoticePage.content,
     currentPage: jobNoticePage.page,
@@ -126,6 +186,8 @@ export function useJobNotices({
     totalElements: jobNoticePage.totalElements,
     isLoading,
     errorMessage,
+    pendingBookmarkIds,
     retry,
+    toggleBookmark,
   };
 }

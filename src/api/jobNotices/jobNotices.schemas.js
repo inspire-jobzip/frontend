@@ -51,3 +51,19 @@ export const jobNoticeListResponseSchema =
     }),
     apiFailureResponseSchema,
   ]);
+
+const bookmarkDataSchema = z.object({
+  bookmarkId: z.number().int().positive().optional(),
+  jobNoticeId: z.number().int().positive(),
+  isBookmarked: z.boolean(),
+});
+
+export const bookmarkResponseSchema =
+  z.discriminatedUnion("success", [
+    z.object({
+      success: z.literal(true),
+      data: bookmarkDataSchema,
+      message: z.string().nullable().optional(),
+    }),
+    apiFailureResponseSchema,
+  ]);

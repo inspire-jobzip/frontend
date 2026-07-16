@@ -6,9 +6,12 @@ import {
 } from "react-router-dom";
 
 import { AuthPage } from "./pages/AuthPage";
+import { CalendarPage } from "./pages/CalendarPage";
 import { JobNoticesPage } from "./pages/JobNoticesPage";
-import { MyPage } from "./pages/MyPage";
+import { JobNoticeDetailPage } from "./pages/JobNoticeDetailPage";
+import { MyPagePage } from "./pages/MyPagePage";
 import { authApi } from "./api/auth/auth.api";
+import { ResumeCreatePage } from "./pages/ResumeCreatePage";
 import {
   clearAuthSession,
   getAuthSession,
@@ -59,6 +62,26 @@ function App() {
       />
 
       <Route
+        path="/jobs/:jobNoticeId"
+        element={
+          <JobNoticeDetailPage
+            authSession={authSession}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      <Route
+        path="/calendar"
+        element={
+          <CalendarPage
+            authSession={authSession}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      <Route
         path="/auth"
         element={
           authSession ? (
@@ -75,16 +98,34 @@ function App() {
         path="/mypage"
         element={
           authSession ? (
-            <MyPage
-              authSession={authSession}
-              onLogout={handleLogout}
-            />
+          <MyPagePage />
+          ) : (
+          <Navigate to="/auth" replace />
+          )
+          }
+      />
+
+      <Route
+        path="/resume/new"
+        element={
+        authSession ? (
+        <ResumeCreatePage />
+        ) : (
+          <Navigate to="/auth" replace />
+        )
+        }
+      />
+
+      <Route
+        path="/resume/:resumeId"
+        element={
+          authSession ? (
+            <ResumeCreatePage />
           ) : (
             <Navigate to="/auth" replace />
           )
         }
       />
-
       <Route
         path="*"
         element={<Navigate to="/" replace />}

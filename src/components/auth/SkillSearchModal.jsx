@@ -11,6 +11,19 @@ import {
   useSkillSearch,
 } from "../../hooks/skill/useSkillSearch";
 
+const SKILL_CATEGORY_BY_JOB_ROLE = {
+  BACKEND: "Backend",
+  FRONTEND: "Frontend",
+  FULLSTACK: "Backend",
+  MOBILE: "Language",
+  DATA: "Database",
+  AI: "AI",
+  DEVOPS: "Infra",
+  SECURITY: "Infra",
+  QA: "Tool",
+  GAME: "Language",
+};
+
 export function SkillSearchModal({
   isOpen,
   desiredJobRole,
@@ -30,6 +43,8 @@ export function SkillSearchModal({
     searchSkills,
     clearSearchResults,
   } = useSkillSearch();
+  const skillCategory =
+    SKILL_CATEGORY_BY_JOB_ROLE[desiredJobRole] ?? "";
 
   useEffect(() => {
     if (!isOpen) {
@@ -49,7 +64,7 @@ export function SkillSearchModal({
     const trimmedKeyword = keyword.trim();
 
     if (!trimmedKeyword) {
-      loadSkills();
+      loadSkills({ category: skillCategory });
       return;
     }
 
@@ -67,6 +82,7 @@ export function SkillSearchModal({
     loadSkills,
     searchSkills,
     clearSearchResults,
+    skillCategory,
   ]);
 
   const displayedSkills = useMemo(() => {
